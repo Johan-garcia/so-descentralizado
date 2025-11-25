@@ -1,26 +1,37 @@
-import numpy as np
-from libs.linear_models import CustomLinearRegression
-from libs.mlp import CustomMLP
+from libs.linear_models import LinearRegression
+from libs.decision_tree import DecisionTree
 
 class MLApp:
     def __init__(self, node_id):
         self.node_id = node_id
 
-    def train(self, data):
-        # data: {'model': 'linear', 'X': [...], 'y': [...]}
-        X = np.array(data['X'])
-        y = np.array(data['y'])
+    def run_task(self, task_data):
+        """
+        Manejador principal.
+        Recibe: { 'algorithm': 'linear', 'file_content': '...' }
+        """
+        algo = task_data.get('algorithm')
+        content = task_data.get('file_content')
         
-        if data['model'] == 'linear':
-            model = CustomLinearRegression()
-            model.fit(X, y)
-            return {'weights': model.weights.tolist(), 'bias': model.bias}
-        
-        elif data['model'] == 'mlp':
-            # Ejemplo simple MLP
-            model = CustomMLP(input_size=len(X[0]), hidden_size=4, output_size=1)
-            model.fit(X, y, epochs=100)
-            # Retornamos éxito (pesos muy grandes para JSON simple)
-            return {'status': 'trained', 'model': 'mlp'}
+        if not content:
+            return {'status': 'error', 'msg': 'No file content provided'}
+
+        print(f" [ML APP] 🚀 Ejecutando algoritmo: {algo}")
+
+        if algo == 'linear':
+            model = LinearRegression()
+            # Llamamos al método inteligente que creamos antes
+            result = model.fit_from_content(content)
             
-        return {'error': 'unknown model'}
+            # Añadimos quién lo ejecutó
+            result['executed_by'] = self.node_id
+            return result
+
+        elif algo == 'tree':
+            model = DecisionTree()
+            result = model.fit_from_content(content)
+            result['executed_by'] = self.node_id
+            return result
+            
+        else:
+            return {'status': 'error', 'msg': f'Unknown algorithm: {algo}'}

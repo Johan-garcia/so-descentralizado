@@ -3,8 +3,8 @@ import json
 import threading
 import os
 from apps.ml_app import MLApp
-from apps.monitor_app import MonitorApp
 from apps.image_app import ImageApp
+from apps.monitor_app import MonitorApp # Asumiendo que esta ya existe de antes
 
 class DistributedAPI:
     def __init__(self, node_id, discovery, scheduler, port=5001):
@@ -13,75 +13,77 @@ class DistributedAPI:
         self.scheduler = scheduler
         self.port = port
         self.running = False
-        self.my_ip = os.getenv('NODE_IP', '127.0.0.1')
         
-        # Apps Locales
+        # Instanciamos las Apps
         self.ml_app = MLApp(node_id)
-        self.monitor_app = MonitorApp(node_id)
         self.image_app = ImageApp(node_id)
+        self.monitor_app = MonitorApp(node_id)
 
     def forward_request(self, target_ip, msg):
-        """Envía la tarea a otro nodo y espera su respuesta"""
+        """Reenvía la tarea a otro nodo (Load Balancing)"""
         try:
-            # Conectar con el nodo remoto (Puerto 5001 que es la API)
-            remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            remote_socket.settimeout(5) # 5 segundos máximo de espera
-            remote_socket.connect((target_ip, 5001))
+            remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            remote.settimeout(10) # Damos 10s porque procesar puede tardar
+            remote.connect((target_ip, 5001))
             
-            # Marcar mensaje como 'FORWARDED' para evitar bucles infinitos
             msg['is_forwarded'] = True
+            remote.send(json.dumps(msg).encode())
             
-            remote_socket.send(json.dumps(msg).encode())
-            response_data = remote_socket.recv(8192)
-            remote_socket.close()
-            
+            # Esperar respuesta grande
+            response_data = remote.recv(16384) 
+            remote.close()
             return json.loads(response_data.decode())
         except Exception as e:
             print(f" [API] ❌ Error forwarding to {target_ip}: {e}")
-            return {'status': 'error', 'msg': 'Remote node failed'}
+            return {'status': 'error', 'msg': f'Node {target_ip} failed'}
 
     def process_local(self, msg):
-        """Ejecuta la tarea en ESTE nodo"""
-        if msg['type'] == 'ML_TRAIN':
-            return self.ml_app.train(msg['data'])
-        elif msg['type'] == 'MONITOR':
+        """Ejecuta la lógica en ESTE nodo"""
+        msg_type = msg.get('type')
+        data = msg.get('data')
+
+        if msg_type == 'ML_TRAIN':
+            return self.ml_app.run_task(data)
+            
+        elif msg_type == 'IMAGE_PROC':
+            return self.image_app.process(data)
+            
+        elif msg_type == 'MONITOR':
             return self.monitor_app.get_stats()
-        elif msg['type'] == 'IMAGE_PROC':
-            return self.image_app.process(msg['data'])
+            
         return {'status': 'error', 'msg': 'Unknown command'}
 
     def _handle_client(self, client):
         try:
-            data = client.recv(8192)
-            if not data: return
-            msg = json.loads(data.decode())
+            raw_data = client.recv(16384) # Buffer aumentado para archivos
+            if not raw_data: return
             
-            # 1. Ver si el mensaje ya fue reenviado (para que quien lo recibe lo ejecute sí o sí)
+            msg = json.loads(raw_data.decode())
+            
+            # 1. Lógica de Distribución (Scheduler)
             is_forwarded = msg.get('is_forwarded', False)
-            
             target_ip = "local"
             
-            # 2. Si NO es reenviado, preguntamos al Scheduler quién debe hacerlo
             if not is_forwarded:
+                # Si soy el primer nodo en recibirlo, decido quién trabaja
                 target_ip = self.scheduler.decide_node()
             
+            # 2. Ejecución o Delegación
             response = {}
-
-            # 3. Ejecución
             if target_ip == "local":
-                print(f" [API] ⚙️ Processing {msg['type']} LOCALLY")
+                print(f" [API] ⚙️ Executing {msg['type']} LOCALLY")
                 response = self.process_local(msg)
             else:
-                # DELEGACIÓN (Load Balancing en acción)
-                print(f" [API] 📡 Forwarding {msg['type']} to {target_ip}")
+                print(f" [API] 📡 Delegating to {target_ip}")
                 response = self.forward_request(target_ip, msg)
-                # Añadimos metadata para saber quién lo hizo realmente
-                response['executed_by'] = target_ip
             
+            # 3. Responder al cliente
             client.send(json.dumps(response).encode())
             
         except Exception as e:
             print(f" [API] Error: {e}")
+            err_resp = {'status': 'error', 'msg': str(e)}
+            client.send(json.dumps(err_resp).encode())
         finally:
             client.close()
 
@@ -89,14 +91,14 @@ class DistributedAPI:
         self.running = True
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind(('0.0.0.0', self.port))
-        server.listen(10)
-        print(f" [API] Listening on TCP {self.port}")
+        server.listen(20)
+        print(f" [API] Distributed API listening on port {self.port}")
         
-        def run_server():
+        def run():
             while self.running:
                 client, addr = server.accept()
                 threading.Thread(target=self._handle_client, args=(client,)).start()
         
-        threading.Thread(target=run_server, daemon=True).start()
+        threading.Thread(target=run, daemon=True).start()
 
     def stop(self): self.running = False
