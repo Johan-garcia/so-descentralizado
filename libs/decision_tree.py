@@ -24,7 +24,7 @@ class DecisionTree:
 
     def fit(self, X, y):
         self.tree = self._build_tree(X, y, depth=0)
-        return {"status": "trained", "depth": self.max_depth, "msg": "Tree structure created in memory"}
+        return {"status": "success", "depth": self.max_depth, "msg": "Tree structure created in memory"}
 
     def fit_from_content(self, file_content):
         try:
