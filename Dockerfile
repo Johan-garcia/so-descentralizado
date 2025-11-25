@@ -1,5 +1,8 @@
 FROM python:3.9-slim
 
+# ESTA ES LA LÍNEA MÁGICA QUE ARREGLA LOS LOGS VACÍOS
+ENV PYTHONUNBUFFERED=1
+
 LABEL description="SO Descentralizado con Librerías Propias de IA"
 
 # Herramientas de sistema
