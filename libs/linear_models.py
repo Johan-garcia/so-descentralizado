@@ -1,76 +1,139 @@
 import math
-import time
 
 class LinearRegression:
-    def __init__(self, learning_rate=0.01, iterations=1000):
-        self.lr = learning_rate
-        self.iters = iterations
+    def __init__(self):
         self.weights = []
-        self.bias = 0.0
+        self.bias = 0. 0
 
-    def _parse_content(self, file_content):
-        """Convierte texto CSV crudo en matrices X e y"""
+    def fit_from_content(self, content):
+        """
+        Entrena regresión lineal desde contenido CSV. 
+        Formato esperado: x1,x2,... ,xn,y
+        """
+        lines = [l.strip() for l in content. strip().split('\n') if l. strip() and not l.startswith('#')]
+        
+        if not lines:
+            return {'status': 'error', 'msg': 'No data provided'}
+        
+        # Parsear datos
         X = []
         y = []
-        lines = file_content.strip().split('\n')
         
         for line in lines:
-            line = line.strip()
-            if not line or line[0].isalpha(): continue
-            
-            parts = line.split(',')
             try:
-                values = [float(p) for p in parts]
-                X.append(values[:-1]) 
-                y.append(values[-1])
-            except ValueError: continue
-            
-        return X, y
-
-    def fit(self, X, y):
-        """Entrenamiento con simulación de carga pesada"""
+                values = [float(v. strip()) for v in line.split(',')]
+                if len(values) < 2:
+                    continue
+                X.append(values[:-1])  # Todas menos la última columna
+                y.append(values[-1])    # Última columna es el target
+            except ValueError:
+                continue
         
-        # --- PRUEBA DE PARALELISMO ---
-        print(f" [MATH] ⏳ Iniciando 'Cálculo Pesado'. Durmiendo 5s...", flush=True)
-        time.sleep(5) # Si es paralelo, el tiempo total será ~5s. Si es secuencial, será ~15s.
-        # -----------------------------
-
+        if not X or not y:
+            return {'status': 'error', 'msg': 'No valid data parsed'}
+        
         n_samples = len(X)
-        if n_samples == 0: return {"status": "error", "msg": "No data"}
         n_features = len(X[0])
         
+        print(f" [LINEAR] 📊 Datos: {n_samples} muestras, {n_features} características")
+        
+        # Inicializar pesos
         self.weights = [0.0] * n_features
         self.bias = 0.0
-
-        for _ in range(self.iters):
+        
+        # Hiperparámetros
+        learning_rate = 0.001
+        epochs = 100
+        
+        # Gradient Descent
+        for epoch in range(epochs):
+            # Calcular predicciones
+            predictions = []
+            for i in range(n_samples):
+                pred = self.bias
+                for j in range(n_features):
+                    pred += self.weights[j] * X[i][j]
+                predictions. append(pred)
+            
+            # Calcular gradientes
             dw = [0.0] * n_features
             db = 0.0
             
             for i in range(n_samples):
-                prediction = sum(x_i * w_i for x_i, w_i in zip(X[i], self.weights)) + self.bias
-                error = prediction - y[i]
-                
+                error = predictions[i] - y[i]
+                db += error
                 for j in range(n_features):
-                    dw[j] += (1 / n_samples) * X[i][j] * error
-                db += (1 / n_samples) * error
-
-            for j in range(n_features):
-                self.weights[j] -= self.lr * dw[j]
-            self.bias -= self.lr * db
+                    dw[j] += error * X[i][j]
             
-        # RETORNO CON STATUS "success" (Arregla el error "All nodes failed")
+            # Actualizar pesos
+            for j in range(n_features):
+                self.weights[j] -= learning_rate * (dw[j] / n_samples)
+            self.bias -= learning_rate * (db / n_samples)
+            
+            # Calcular MSE cada 20 épocas
+            if (epoch + 1) % 20 == 0:
+                mse = sum((predictions[i] - y[i])**2 for i in range(n_samples)) / n_samples
+                print(f" [LINEAR] Época {epoch+1}/{epochs} - MSE: {mse:.4f}")
+        
+        # Calcular MSE final
+        final_predictions = []
+        for i in range(n_samples):
+            pred = self.bias
+            for j in range(n_features):
+                pred += self.weights[j] * X[i][j]
+            final_predictions.append(pred)
+        
+        mse = sum((final_predictions[i] - y[i])**2 for i in range(n_samples)) / n_samples
+        rmse = math.sqrt(mse)
+        
+        print(f" [LINEAR] ✅ Entrenamiento completado - RMSE: {rmse:.4f}")
+        
         return {
-            "status": "success", 
-            "weights": self.weights,
-            "bias": self.bias
+            'status': 'success',
+            'weights': self. weights,
+            'bias': self.bias,
+            'mse': mse,
+            'rmse': rmse,
+            'n_samples': n_samples,
+            'n_features': n_features
         }
 
-    def fit_from_content(self, file_content):
-        try:
-            X, y = self._parse_content(file_content)
-            if not X: return {"status": "error", "msg": "No valid data"}
-            if len(X) < 2: return {"status": "error", "msg": "Need at least 2 rows of data"}
-            
-            return self.fit(X, y)
-        except Exception as e:
-            return {"status": "error", "msg": str(e)}
+
+class DecisionTree:
+    def __init__(self):
+        self.tree = None
+
+    def fit_from_content(self, content):
+        """Árbol de decisión básico"""
+        lines = [l.strip() for l in content. strip().split('\n') if l.strip() and not l.startswith('#')]
+        
+        if not lines:
+            return {'status': 'error', 'msg': 'No data provided'}
+        
+        # Parse simple
+        X = []
+        y = []
+        
+        for line in lines:
+            try:
+                values = [float(v.strip()) for v in line.split(',')]
+                if len(values) < 2:
+                    continue
+                X.append(values[:-1])
+                y.append(values[-1])
+            except ValueError:
+                continue
+        
+        if not X:
+            return {'status': 'error', 'msg': 'No valid data'}
+        
+        print(f" [TREE] 🌳 Datos: {len(X)} muestras")
+        
+        # Árbol simple: usar promedio como predicción
+        avg = sum(y) / len(y)
+        
+        return {
+            'status': 'success',
+            'tree_prediction': avg,
+            'n_samples': len(X)
+        }

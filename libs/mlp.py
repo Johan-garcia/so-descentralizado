@@ -1,96 +1,172 @@
 import math
 import random
-import time
 
 class MLP:
-    def __init__(self, input_size=2, hidden_size=4, output_size=1, learning_rate=0.1, epochs=500):
+    def __init__(self, input_size, hidden_size, output_size):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.lr = learning_rate
-        self.epochs = epochs
         
-        # Inicialización aleatoria de pesos (Matriz W1 y W2)
-        # W1: input x hidden
-        self.W1 = [[random.uniform(-0.5, 0.5) for _ in range(hidden_size)] for _ in range(input_size)]
+        # Inicializar pesos con Xavier initialization
+        limit_ih = math.sqrt(6.0 / (input_size + hidden_size))
+        limit_ho = math.sqrt(6.0 / (hidden_size + output_size))
+        
+        self.W1 = [[random.uniform(-limit_ih, limit_ih) for _ in range(hidden_size)] 
+                   for _ in range(input_size)]
         self.b1 = [0.0] * hidden_size
         
-        # W2: hidden x output
-        self.W2 = [[random.uniform(-0.5, 0.5) for _ in range(output_size)] for _ in range(hidden_size)]
+        self.W2 = [[random.uniform(-limit_ho, limit_ho) for _ in range(output_size)] 
+                   for _ in range(hidden_size)]
         self.b2 = [0.0] * output_size
 
-    def _sigmoid(self, x):
-        return 1.0 / (1.0 + math.exp(-x))
+    def sigmoid(self, x):
+        if x > 20: return 1.0
+        if x < -20: return 0.0
+        return 1. 0 / (1.0 + math.exp(-x))
 
-    def _sigmoid_derivative(self, x):
+    def sigmoid_derivative(self, x):
         return x * (1.0 - x)
 
-    def fit_from_content(self, file_content):
-        # Parsear CSV
-        X = []
-        y = []
-        lines = file_content.strip().split('\n')
+    def forward(self, X):
+        """Forward pass"""
+        # Input -> Hidden
+        hidden = []
+        for j in range(self.hidden_size):
+            z = self.b1[j]
+            for i in range(self.input_size):
+                z += X[i] * self.W1[i][j]
+            hidden.append(self.sigmoid(z))
+        
+        # Hidden -> Output
+        output = []
+        for k in range(self.output_size):
+            z = self.b2[k]
+            for j in range(self.hidden_size):
+                z += hidden[j] * self. W2[j][k]
+            output.append(self.sigmoid(z))
+        
+        return hidden, output
+
+    def train(self, X_train, y_train, epochs=100, learning_rate=0. 1):
+        """Entrenamiento con backpropagation"""
+        n_samples = len(X_train)
+        
+        for epoch in range(epochs):
+            total_loss = 0.0
+            
+            for sample_idx in range(n_samples):
+                X = X_train[sample_idx]
+                y_true = y_train[sample_idx]
+                
+                # Forward
+                hidden, output = self.forward(X)
+                
+                # Calcular loss (MSE)
+                loss = 0.0
+                for k in range(self.output_size):
+                    target = 1. 0 if y_true == k else 0.0
+                    loss += (output[k] - target) ** 2
+                total_loss += loss
+                
+                # Backward
+                # Output layer gradients
+                output_deltas = []
+                for k in range(self.output_size):
+                    target = 1.0 if y_true == k else 0. 0
+                    error = output[k] - target
+                    delta = error * self.sigmoid_derivative(output[k])
+                    output_deltas.append(delta)
+                
+                # Hidden layer gradients
+                hidden_deltas = []
+                for j in range(self.hidden_size):
+                    error = sum(output_deltas[k] * self.W2[j][k] 
+                               for k in range(self.output_size))
+                    delta = error * self.sigmoid_derivative(hidden[j])
+                    hidden_deltas.append(delta)
+                
+                # Update W2 and b2
+                for j in range(self.hidden_size):
+                    for k in range(self.output_size):
+                        self.W2[j][k] -= learning_rate * output_deltas[k] * hidden[j]
+                
+                for k in range(self.output_size):
+                    self.b2[k] -= learning_rate * output_deltas[k]
+                
+                # Update W1 and b1
+                for i in range(self.input_size):
+                    for j in range(self.hidden_size):
+                        self.W1[i][j] -= learning_rate * hidden_deltas[j] * X[i]
+                
+                for j in range(self.hidden_size):
+                    self.b1[j] -= learning_rate * hidden_deltas[j]
+            
+            avg_loss = total_loss / n_samples
+            
+            if (epoch + 1) % 20 == 0:
+                print(f" [MLP] Época {epoch+1}/{epochs} - Loss: {avg_loss:. 4f}")
+        
+        return avg_loss
+
+    def fit_from_content(self, content):
+        """Entrenar desde CSV"""
+        lines = [l.strip() for l in content.strip(). split('\n') 
+                if l.strip() and not l. startswith('#')]
+        
+        if not lines:
+            return {'status': 'error', 'msg': 'No data provided'}
+        
+        X_train = []
+        y_train = []
+        
         for line in lines:
             try:
-                parts = [float(p) for p in line.split(',')]
-                X.append(parts[:-1])
-                y.append([parts[-1]]) # Output debe ser lista
-            except: continue
-
-        if not X: return {'status': 'error', 'msg': 'No data'}
+                values = [float(v.strip()) for v in line. split(',')]
+                if len(values) < 2:
+                    continue
+                X_train. append(values[:-1])
+                y_train.append(int(values[-1]))
+            except (ValueError, IndexError):
+                continue
         
-        # Ajustar tamaño de entrada dinámicamente
-        self.input_size = len(X[0])
-        # Reinicializar W1 si cambió el tamaño de entrada
-        if len(self.W1) != self.input_size:
-             self.W1 = [[random.uniform(-0.5, 0.5) for _ in range(self.hidden_size)] for _ in range(self.input_size)]
-
-        print(f" [MATH] 🧠 Entrenando MLP (Backpropagation manual)...")
-        time.sleep(5) # Para prueba de paralelismo
-
-        for epoch in range(self.epochs):
-            for i in range(len(X)):
-                # --- FORWARD PASS ---
-                # 1. Hidden Layer
-                hidden_inputs = [0.0] * self.hidden_size
-                for h in range(self.hidden_size):
-                    val = sum(X[i][In] * self.W1[In][h] for In in range(self.input_size)) + self.b1[h]
-                    hidden_inputs[h] = self._sigmoid(val)
-                
-                # 2. Output Layer
-                final_outputs = [0.0] * self.output_size
-                for o in range(self.output_size):
-                    val = sum(hidden_inputs[h] * self.W2[h][o] for h in range(self.hidden_size)) + self.b2[o]
-                    final_outputs[o] = self._sigmoid(val)
-
-                # --- BACKPROPAGATION ---
-                # Error Output
-                expected = y[i]
-                output_errors = [expected[o] - final_outputs[o] for o in range(self.output_size)]
-                output_deltas = [output_errors[o] * self._sigmoid_derivative(final_outputs[o]) for o in range(self.output_size)]
-
-                # Error Hidden
-                hidden_errors = [0.0] * self.hidden_size
-                for h in range(self.hidden_size):
-                    error = sum(output_deltas[o] * self.W2[h][o] for o in range(self.output_size))
-                    hidden_errors[h] = error * self._sigmoid_derivative(hidden_inputs[h])
-
-                # Actualizar W2 y b2
-                for o in range(self.output_size):
-                    self.b2[o] += output_deltas[o] * self.lr
-                    for h in range(self.hidden_size):
-                        self.W2[h][o] += hidden_inputs[h] * output_deltas[o] * self.lr
-                
-                # Actualizar W1 y b1
-                for h in range(self.hidden_size):
-                    self.b1[h] += hidden_errors[h] * self.lr
-                    for In in range(self.input_size):
-                        self.W1[In][h] += X[i][In] * hidden_errors[h] * self.lr
-
+        if not X_train:
+            return {'status': 'error', 'msg': 'No valid data'}
+        
+        n_samples = len(X_train)
+        n_features = len(X_train[0])
+        n_classes = max(y_train) + 1
+        
+        print(f" [MLP] 🧠 Datos: {n_samples} muestras, {n_features} features, {n_classes} clases")
+        
+        # Normalizar
+        means = [sum(X_train[i][j] for i in range(n_samples)) / n_samples 
+                for j in range(n_features)]
+        stds = []
+        for j in range(n_features):
+            var = sum((X_train[i][j] - means[j])**2 for i in range(n_samples)) / n_samples
+            stds.append(math.sqrt(var) if var > 0 else 1.0)
+        
+        X_normalized = []
+        for i in range(n_samples):
+            row = [(X_train[i][j] - means[j]) / stds[j] if stds[j] > 0 else 0.0
+                   for j in range(n_features)]
+            X_normalized.append(row)
+        
+        # Reinitializar red con tamaños correctos
+        self.__init__(n_features, 5, n_classes)
+        
+        # Entrenar
+        final_loss = self.train(X_normalized, y_train, epochs=100, learning_rate=0.1)
+        
+        print(f" [MLP] ✅ Entrenamiento completado")
+        
         return {
-            "status": "success",
-            "input_to_hidden_w": self.W1,
-            "hidden_bias": self.b1,
-            "hidden_to_output_w": self.W2,
-            "output_bias": self.b2
+            'status': 'success',
+            'input_to_hidden_w': self.W1,
+            'hidden_bias': self.b1,
+            'hidden_to_output_w': self.W2,
+            'output_bias': self.b2,
+            'final_loss': final_loss,
+            'n_samples': n_samples,
+            'n_classes': n_classes
         }
