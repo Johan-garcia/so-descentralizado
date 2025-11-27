@@ -35,17 +35,17 @@ def enviar_al_kernel(payload):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("❌ Uso: python3 ejecutar.py <archivo> <app> [modo]")
-        print("\n📚 Apps disponibles:")
+        print("[ERROR] Uso: python3 ejecutar.py <archivo> <app> [modo]")
+        print("\nApps disponibles:")
         print("   • linear    - Regresión Lineal")
         print("   • logistic  - Regresión Logística")
         print("   • mlp       - Red Neuronal (MLP)")
         print("   • tree      - Árbol de Decisión")
         print("   • image     - Procesamiento de Imágenes")
-        print("\n⚙️  Modos:")
+        print("\nModos:")
         print("   • single   - Ejecuta en un solo nodo (defecto)")
         print("   • parallel - Distribuye entre todos los nodos")
-        print("\n📝 Ejemplos:")
+        print("\nEjemplos:")
         print("   python3 ejecutar.py mis_datos/regresion.txt linear parallel")
         print("   python3 ejecutar.py mis_datos/clasificacion.txt logistic parallel")
         print("   python3 ejecutar.py mis_datos/red_neuronal.txt mlp parallel")
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     modo = sys.argv[3] if len(sys.argv) > 3 else 'single'
 
     if not os.path.exists(archivo_path):
-        print(f"❌ Archivo no encontrado: {archivo_path}")
+        print(f"[ERROR] Archivo no encontrado: {archivo_path}")
         sys.exit(1)
 
     with open(archivo_path, 'r') as f:
@@ -72,38 +72,38 @@ if __name__ == "__main__":
     if app_type == 'linear':
         payload['type'] = 'ML_TRAIN'
         payload['data']['algorithm'] = 'linear'
-        print("🤖 Algoritmo: Regresión Lineal")
+        print("Algoritmo: Regresion Lineal")
         
     elif app_type == 'logistic':
         payload['type'] = 'LOGISTIC'
-        print("🤖 Algoritmo: Regresión Logística")
+        print("Algoritmo: Regresion Logistica")
         
     elif app_type == 'mlp':
         payload['type'] = 'MLP_TRAIN'
-        print("🤖 Algoritmo: Red Neuronal (MLP)")
+        print("Algoritmo: Red Neuronal (MLP)")
         
     elif app_type == 'tree':
         payload['type'] = 'TREE_TRAIN'
         payload['data']['max_depth'] = 5  # Profundidad máxima del árbol
-        print("🤖 Algoritmo: Árbol de Decisión")
+        print("Algoritmo: Arbol de Decision")
         
     elif app_type == 'image':
         payload['type'] = 'IMAGE_PROC'
         payload['data']['operation'] = 'invert'
-        print("🤖 Algoritmo: Procesamiento de Imágenes")
+        print("Algoritmo: Procesamiento de Imagenes")
         
     else:
-        print(f"❌ App desconocida: {app_type}")
+        print(f"[ERROR] App desconocida: {app_type}")
         print("Apps válidas: linear, logistic, mlp, tree, image")
         sys.exit(1)
 
-    print(f"🚀 Enviando tarea en modo: {modo. upper()}")
-    print(f"📂 Archivo: {archivo_path}\n")
+    print(f"[INICIANDO] Enviando tarea en modo: {modo. upper()}")
+    print(f"Archivo: {archivo_path}\n")
     
     res = enviar_al_kernel(payload)
     
     print("\n" + "="*60)
-    print("📥 RESULTADO FINAL")
+    print("RESULTADO FINAL")
     print("="*60)
     print(json.dumps(res, indent=2, ensure_ascii=False))
     print("="*60)

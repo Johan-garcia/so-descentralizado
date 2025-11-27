@@ -11,7 +11,7 @@ sys.path.append(os.getcwd())
 def main():
     # Generar ID único
     node_id = f"node-{uuid.uuid4().hex[:6]}"
-    print(f" [KERNEL] ⚡ Iniciando nodo {node_id}...")
+    print(f" [KERNEL] Iniciando nodo {node_id}...")
 
     # Iniciar componentes
     discovery = NodeDiscovery(node_id)
@@ -22,7 +22,7 @@ def main():
     api = DistributedAPI(node_id, discovery, scheduler)
     api.start()
 
-    print(f" [KERNEL] ✅ Sistema Operativo en línea ({node_id}).")
+    print(f" [KERNEL] [OK] Sistema Operativo en linea ({node_id}).")
     
     try:
         while True: time.sleep(1)

@@ -23,21 +23,21 @@ def test_api_endpoint(ip, port=5001, msg_type='MONITOR', data={}):
 
 def test_monitor():
     """Prueba la app de monitoreo"""
-    print("🧪 Testing Monitor App...")
+    print("[TEST] Testing Monitor App...")
     result = test_api_endpoint('127.0.0.1', msg_type='MONITOR')
     
     if 'error' not in result:
-        print(f"   ✅ Node: {result.get('node')}")
-        print(f"   ✅ CPU: {result.get('cpu')}%")
-        print(f"   ✅ RAM: {result.get('ram')}%")
+        print(f"   [OK] Node: {result.get('node')}")
+        print(f"   [OK] CPU: {result.get('cpu')}%")
+        print(f"   [OK] RAM: {result.get('ram')}%")
         return True
     else:
-        print(f"   ❌ Error: {result['error']}")
+        print(f"   [ERROR] Error: {result['error']}")
         return False
 
 def test_ml():
     """Prueba ML training"""
-    print("\n🧪 Testing ML Training...")
+    print("\n[TEST] Testing ML Training...")
     result = test_api_endpoint('127.0.0.1', msg_type='ML_TRAIN', data={
         'model': 'linear',
         'X': [[1], [2], [3], [4], [5]],
@@ -45,16 +45,16 @@ def test_ml():
     })
     
     if 'error' not in result:
-        print(f"   ✅ Weights: {result.get('weights')}")
-        print(f"   ✅ Bias: {result.get('bias')}")
+        print(f"   [OK] Weights: {result.get('weights')}")
+        print(f"   [OK] Bias: {result.get('bias')}")
         return True
     else:
-        print(f"   ❌ Error: {result['error']}")
+        print(f"   [ERROR] Error: {result['error']}")
         return False
 
 def test_image_processing():
     """Prueba procesamiento de imágenes"""
-    print("\n🧪 Testing Image Processing...")
+    print("\n[TEST] Testing Image Processing...")
     
     # Imagen 3x3 simple
     test_image = [[100, 150, 200], [50, 100, 150], [25, 75, 125]]
@@ -65,17 +65,17 @@ def test_image_processing():
     })
     
     if 'error' not in result:
-        print(f"   ✅ Image processed successfully")
+        print(f"   [OK] Image processed successfully")
         print(f"   Original: {test_image[0]}")
         print(f"   Inverted: {result.get('image', [[]])[0]}")
         return True
     else:
-        print(f"   ❌ Error: {result['error']}")
+        print(f"   [ERROR] Error: {result['error']}")
         return False
 
 def scan_network_for_nodes():
     """Escanea la red para encontrar nodos activos"""
-    print("\n🔍 Scanning network for active nodes...")
+    print("\n[BUSCANDO] Scanning network for active nodes...")
     print("   (This may take 20-30 seconds)")
     
     active_nodes = []
@@ -94,7 +94,7 @@ def scan_network_for_nodes():
                     if 'node' in response:
                         node_id = response['node']
                         active_nodes.append({'id': node_id, 'ip': ip})
-                        print(f"   ✅ Found: {node_id} at {ip}")
+                        print(f"   [OK] Found: {node_id} at {ip}")
                 except:
                     pass
             sock.close()
@@ -106,7 +106,7 @@ def scan_network_for_nodes():
 
 def check_docker_logs():
     """Revisa los logs del Docker para ver peers descubiertos"""
-    print("\n📋 Checking Docker logs for peer discovery...")
+    print("\n[INFO] Checking Docker logs for peer discovery...")
     try:
         result = subprocess.run(['docker', 'logs', '--tail', '50', 'so-node'], 
                               capture_output=True, text=True, timeout=5)
@@ -115,16 +115,16 @@ def check_docker_logs():
         
         # Buscar menciones de peers
         if 'peer' in logs.lower() or 'found' in logs.lower():
-            print("   ✅ Peer discovery activity detected")
+            print("   [OK] Peer discovery activity detected")
             # Mostrar líneas relevantes
             for line in logs.split('\n'):
                 if 'peer' in line.lower() or 'found' in line.lower():
                     print(f"      {line.strip()}")
         else:
-            print("   ⚠️  No peer discovery activity in recent logs")
+            print("   [ADVERTENCIA] No peer discovery activity in recent logs")
             
     except Exception as e:
-        print(f"   ❌ Could not read logs: {e}")
+        print(f"   [ERROR] Could not read logs: {e}")
 
 if __name__ == "__main__":
     print("="*70)
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     print("\n" + "="*70)
     print(" TEST SUMMARY")
     print("="*70)
-    print(f"  Monitor App:        {'✅ PASS' if results['monitor'] else '❌ FAIL'}")
-    print(f"  ML Training:        {'✅ PASS' if results['ml'] else '❌ FAIL'}")
-    print(f"  Image Processing:   {'✅ PASS' if results['image'] else '❌ FAIL'}")
+    print(f"  Monitor App:        {'[OK] PASS' if results['monitor'] else '[ERROR] FAIL'}")
+    print(f"  ML Training:        {'[OK] PASS' if results['ml'] else '[ERROR] FAIL'}")
+    print(f"  Image Processing:   {'[OK] PASS' if results['image'] else '[ERROR] FAIL'}")
     print(f"  Active Nodes:       {len(results['nodes'])}")
     
     for node in results['nodes']:
@@ -169,9 +169,9 @@ if __name__ == "__main__":
     
     print("\n" + "="*70)
     if all_tests_pass and len(results['nodes']) >= 3:
-        print(" 🎉 ALL TESTS PASSED - SYSTEM FULLY OPERATIONAL")
+        print(" ALL TESTS PASSED - SYSTEM FULLY OPERATIONAL")
     elif all_tests_pass:
-        print(" ⚠️  APPS WORKING - Waiting for all 3 nodes to connect")
+        print(" [ADVERTENCIA] APPS WORKING - Waiting for all 3 nodes to connect")
     else:
-        print(" ❌ SOME TESTS FAILED - Check logs above")
+        print(" [ERROR] SOME TESTS FAILED - Check logs above")
     print("="*70)

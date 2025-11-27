@@ -8,7 +8,7 @@ class LogisticApp:
         content = task_data.get('file_content')
         if not content: return {'status': 'error', 'msg': 'No content'}
         
-        print(f" [LOGISTIC APP] 🚀 Ejecutando Regresión Logística...")
+        print(f" [LOGISTIC APP] [INICIANDO] Ejecutando Regresion Logistica...")
         model = LogisticRegression()
         result = model.fit_from_content(content)
         result['executed_by'] = self.node_id

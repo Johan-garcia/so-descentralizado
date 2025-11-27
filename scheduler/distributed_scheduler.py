@@ -12,22 +12,22 @@ class DistributedScheduler:
         
         # --- DEBUG PRINT ---
         # Esto saldrá en los logs de docker y nos dirá la verdad
-        print(f" [DEBUG SCHEDULER] 👀 Veo {len(peers)} amigos: {list(peers.keys())}")
+        print(f" [DEBUG SCHEDULER] Veo {len(peers)} amigos: {list(peers.keys())}")
         # -------------------
 
         # Si no hay nadie, local
         if not peers:
-            print(" [DEBUG] ❌ Nadie disponible, me toca a mí (Local)")
+            print(" [DEBUG] [ERROR] Nadie disponible, me toca a mi (Local)")
             return "local"
         
         candidates = list(peers.values())
         
         # Forzamos un poco más la distribución (80% probabilidad de enviar fuera para probar)
         if random.random() < 0.2: 
-            print(" [DEBUG] 🎲 Decisión aleatoria: Lo hago yo (Local)")
+            print(" [DEBUG] Decision aleatoria: Lo hago yo (Local)")
             return "local"
             
         chosen_peer = random.choice(candidates)
         target_ip = chosen_peer['ip']
-        print(f" [DEBUG] 🚀 ENVIANDO TAREA A: {target_ip}")
+        print(f" [DEBUG] [INICIANDO] ENVIANDO TAREA A: {target_ip}")
         return target_ip

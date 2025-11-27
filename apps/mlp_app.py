@@ -14,7 +14,7 @@ class MLPApp:
         if not content:
             return {'status': 'error', 'msg': 'No file content provided'}
 
-        print(f" [MLP APP] 🧠 Ejecutando Red Neuronal...")
+        print(f" [MLP APP] Ejecutando Red Neuronal...")
 
         # El MLP se instanciará dentro del método fit_from_content
         # que detectará automáticamente el tamaño de entrada y salida

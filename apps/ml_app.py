@@ -16,7 +16,7 @@ class MLApp:
         if not content:
             return {'status': 'error', 'msg': 'No file content provided'}
 
-        print(f" [ML APP] 🚀 Ejecutando algoritmo: {algo}")
+        print(f" [ML APP] [INICIANDO] Ejecutando algoritmo: {algo}")
 
         if algo == 'linear':
             model = LinearRegression()

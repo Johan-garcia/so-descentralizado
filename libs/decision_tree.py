@@ -40,7 +40,7 @@ class DecisionTree:
         self.n_features = len(X[0])
         self.n_classes = max(y) + 1
         
-        print(f" [TREE] 🌳 Datos: {n_samples} muestras, {self.n_features} features, {self.n_classes} clases")
+        print(f" [TREE] Datos: {n_samples} muestras, {self.n_features} features, {self.n_classes} clases")
         
         # Construir árbol
         self.tree = self._build_tree(X, y, depth=0)
@@ -54,7 +54,7 @@ class DecisionTree:
         
         accuracy = correct / n_samples
         
-        print(f" [TREE] ✅ Árbol construido - Profundidad: {self._get_depth(self.tree)} - Accuracy: {accuracy*100:.2f}%")
+        print(f" [TREE] [OK] Arbol construido - Profundidad: {self._get_depth(self.tree)} - Accuracy: {accuracy*100:.2f}%")
         
         return {
             'status': 'success',

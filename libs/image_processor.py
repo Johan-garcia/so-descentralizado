@@ -28,7 +28,7 @@ class ImageProcessor:
         rows = len(matrix)
         cols = len(matrix[0]) if matrix else 0
         
-        print(f" [IMAGE] 🖼️  Procesando imagen {rows}x{cols} - Operación: {operation}")
+        print(f" [IMAGE] Procesando imagen {rows}x{cols} - Operacion: {operation}")
         
         if operation == 'invert':
             result = self.invert(matrix)
