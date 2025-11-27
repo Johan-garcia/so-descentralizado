@@ -4,13 +4,13 @@ import socket
 import os
 import struct
 
-API_IP = '127.0.0. 1'
+API_IP = '127.0.0.1'
 API_PORT = 5001
 
 def enviar_al_kernel(payload):
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client. settimeout(30)  # Timeout más largo para procesos distribuidos
+        client.settimeout(30)  # Timeout más largo para procesos distribuidos
         client.connect((API_IP, API_PORT))
         
         # Protocolo con longitud (Seguro)
@@ -29,7 +29,7 @@ def enviar_al_kernel(payload):
             data += packet
             
         client.close()
-        return json. loads(data.decode())
+        return json.loads(data.decode())
     except Exception as e:
         return {'status': 'error', 'msg': str(e)}
 
@@ -88,9 +88,9 @@ if __name__ == "__main__":
     else:
         print(f"❌ App desconocida: {app_type}")
         print("Apps válidas: linear, logistic, mlp, image")
-        sys. exit(1)
+        sys.exit(1)
 
-    print(f"🚀 Enviando tarea en modo: {modo. upper()}")
+    print(f"🚀 Enviando tarea en modo: {modo.upper()}")
     print(f"📂 Archivo: {archivo_path}\n")
     
     res = enviar_al_kernel(payload)
