@@ -7,7 +7,7 @@ class ImageProcessor:
         Procesa una imagen en formato CSV
         Operaciones: invert, blur, sharpen, edge_detect
         """
-        lines = [l.strip() for l in content. strip().split('\n') 
+        lines = [l.strip() for l in content.strip().split('\n') 
                 if l.strip() and not l.startswith('#')]
         
         if not lines:

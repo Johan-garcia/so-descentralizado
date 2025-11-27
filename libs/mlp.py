@@ -22,7 +22,7 @@ class MLP:
     def sigmoid(self, x):
         if x > 20: return 1.0
         if x < -20: return 0.0
-        return 1. 0 / (1.0 + math.exp(-x))
+        return 1.0 / (1.0 + math.exp(-x))
 
     def sigmoid_derivative(self, x):
         return x * (1.0 - x)
@@ -42,12 +42,12 @@ class MLP:
         for k in range(self.output_size):
             z = self.b2[k]
             for j in range(self.hidden_size):
-                z += hidden[j] * self. W2[j][k]
+                z += hidden[j] * self.W2[j][k]
             output.append(self.sigmoid(z))
         
         return hidden, output
 
-    def train(self, X_train, y_train, epochs=100, learning_rate=0. 1):
+    def train(self, X_train, y_train, epochs=100, learning_rate=0.1):
         """Entrenamiento con backpropagation"""
         n_samples = len(X_train)
         
@@ -64,7 +64,7 @@ class MLP:
                 # Calcular loss (MSE)
                 loss = 0.0
                 for k in range(self.output_size):
-                    target = 1. 0 if y_true == k else 0.0
+                    target = 1.0 if y_true == k else 0.0
                     loss += (output[k] - target) ** 2
                 total_loss += loss
                 
@@ -72,7 +72,7 @@ class MLP:
                 # Output layer gradients
                 output_deltas = []
                 for k in range(self.output_size):
-                    target = 1.0 if y_true == k else 0. 0
+                    target = 1.0 if y_true == k else 0.0
                     error = output[k] - target
                     delta = error * self.sigmoid_derivative(output[k])
                     output_deltas.append(delta)
@@ -104,14 +104,14 @@ class MLP:
             avg_loss = total_loss / n_samples
             
             if (epoch + 1) % 20 == 0:
-                print(f" [MLP] Época {epoch+1}/{epochs} - Loss: {avg_loss:. 4f}")
+                print(f" [MLP] Época {epoch+1}/{epochs} - Loss: {avg_loss:.4f}")
         
         return avg_loss
 
     def fit_from_content(self, content):
         """Entrenar desde CSV"""
-        lines = [l.strip() for l in content.strip(). split('\n') 
-                if l.strip() and not l. startswith('#')]
+        lines = [l.strip() for l in content.strip().split('\n') 
+                if l.strip() and not l.startswith('#')]
         
         if not lines:
             return {'status': 'error', 'msg': 'No data provided'}
@@ -121,10 +121,10 @@ class MLP:
         
         for line in lines:
             try:
-                values = [float(v.strip()) for v in line. split(',')]
+                values = [float(v.strip()) for v in line.split(',')]
                 if len(values) < 2:
                     continue
-                X_train. append(values[:-1])
+                X_train.append(values[:-1])
                 y_train.append(int(values[-1]))
             except (ValueError, IndexError):
                 continue

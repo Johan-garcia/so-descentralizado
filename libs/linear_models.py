@@ -3,14 +3,14 @@ import math
 class LinearRegression:
     def __init__(self):
         self.weights = []
-        self.bias = 0. 0
+        self.bias = 0.0
 
     def fit_from_content(self, content):
         """
         Entrena regresión lineal desde contenido CSV. 
         Formato esperado: x1,x2,... ,xn,y
         """
-        lines = [l.strip() for l in content. strip().split('\n') if l. strip() and not l.startswith('#')]
+        lines = [l.strip() for l in content.strip().split('\n') if l.strip() and not l.startswith('#')]
         
         if not lines:
             return {'status': 'error', 'msg': 'No data provided'}
@@ -21,7 +21,7 @@ class LinearRegression:
         
         for line in lines:
             try:
-                values = [float(v. strip()) for v in line.split(',')]
+                values = [float(v.strip()) for v in line.split(',')]
                 if len(values) < 2:
                     continue
                 X.append(values[:-1])  # Todas menos la última columna
@@ -53,7 +53,7 @@ class LinearRegression:
                 pred = self.bias
                 for j in range(n_features):
                     pred += self.weights[j] * X[i][j]
-                predictions. append(pred)
+                predictions.append(pred)
             
             # Calcular gradientes
             dw = [0.0] * n_features
@@ -90,7 +90,7 @@ class LinearRegression:
         
         return {
             'status': 'success',
-            'weights': self. weights,
+            'weights': self.weights,
             'bias': self.bias,
             'mse': mse,
             'rmse': rmse,
@@ -105,7 +105,7 @@ class DecisionTree:
 
     def fit_from_content(self, content):
         """Árbol de decisión básico"""
-        lines = [l.strip() for l in content. strip().split('\n') if l.strip() and not l.startswith('#')]
+        lines = [l.strip() for l in content.strip().split('\n') if l.strip() and not l.startswith('#')]
         
         if not lines:
             return {'status': 'error', 'msg': 'No data provided'}
