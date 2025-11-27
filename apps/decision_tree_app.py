@@ -15,7 +15,7 @@ class DecisionTreeApp:
         if not content:
             return {'status': 'error', 'msg': 'No file content provided'}
 
-        print(f" [TREE APP] 🌳 Ejecutando Árbol de Decisión (max_depth={max_depth})...")
+        print(f" [TREE APP] Ejecutando Arbol de Decision (max_depth={max_depth})...")
 
         model = DecisionTree(max_depth=max_depth, min_samples_split=2)
         result = model.fit_from_content(content)

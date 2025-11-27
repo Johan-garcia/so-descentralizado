@@ -55,7 +55,7 @@ class DistributedAPI:
             remote.close()
             return response
         except Exception as e:
-            print(f" [API] ❌ Falló conexión con {target_ip}: {e}")
+            print(f" [API] [ERROR] Fallo conexion con {target_ip}: {e}")
             return None
 
     def _split_data(self, content, num_parts):
@@ -226,7 +226,7 @@ class DistributedAPI:
         candidates.append({'ip': 'local'})
         
         active_workers = []
-        print(f" [PARALLEL] 🔍 Buscando nodos para {msg['type']}...")
+        print(f" [PARALLEL] [BUSCANDO] Buscando nodos para {msg['type']}...")
         for w in candidates:
             target = w['ip']
             if target == 'local': 
@@ -238,12 +238,12 @@ class DistributedAPI:
                     s.connect((target, self.port))
                     s.close()
                     active_workers.append(w)
-                    print(f" [PARALLEL] ✅ Nodo {target} disponible")
+                    print(f" [PARALLEL] [OK] Nodo {target} disponible")
                 except: 
-                    print(f" [PARALLEL] ⚠️ Nodo {target} no responde")
+                    print(f" [PARALLEL] [ADVERTENCIA] Nodo {target} no responde")
         
         num_workers = len(active_workers)
-        print(f" [PARALLEL] 🚀 Distribuyendo a {num_workers} nodos...")
+        print(f" [PARALLEL] [INICIANDO] Distribuyendo a {num_workers} nodos...")
         chunks = self._split_data(msg['data']. get('file_content',''), num_workers)
         
         threads = []
@@ -273,7 +273,7 @@ class DistributedAPI:
         t = msg.get('type')
         d = msg['data']
         
-        print(f" [LOCAL] 🔧 Procesando {t} en nodo {self.node_id}")
+        print(f" [LOCAL] Procesando {t} en nodo {self.node_id}")
         
         if t == 'ML_TRAIN': 
             return self.ml_app.run_task(d)
@@ -295,7 +295,7 @@ class DistributedAPI:
             msg = self._recv_msg(client)
             if not msg: return
             
-            print(f" [API] 📨 Solicitud recibida: {msg. get('type')} en modo {msg.get('mode', 'single')}")
+            print(f" [API] Solicitud recibida: {msg. get('type')} en modo {msg.get('mode', 'single')}")
             
             if msg.get('mode') == 'parallel':
                 response = self.process_parallel(msg)
@@ -309,7 +309,7 @@ class DistributedAPI:
             
             self._send_msg(client, response)
         except Exception as e: 
-            print(f" [API] ❌ Error procesando cliente: {e}")
+            print(f" [API] [ERROR] Error procesando cliente: {e}")
         finally: 
             client.close()
 
@@ -319,7 +319,7 @@ class DistributedAPI:
         s. setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(('0.0.0.0', self.port))
         s.listen(20)
-        print(f" [API] 🎧 Listening on port {self.port}")
+        print(f" [API] Listening on port {self.port}")
         
         def run():
             while self.running:

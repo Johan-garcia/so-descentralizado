@@ -29,13 +29,13 @@ def enviar_tarea(i):
         
         # Ver quién lo ejecutó
         ejecutor = response.get('executed_by', 'local')
-        print(f"Petición {i+1}: ✅ Procesada por -> {ejecutor}")
+        print(f"Peticion {i+1}: [OK] Procesada por -> {ejecutor}")
         
         client.close()
     except Exception as e:
-        print(f"Petición {i+1}: ❌ Error: {e}")
+        print(f"Peticion {i+1}: [ERROR] Error: {e}")
 
-print(f"--- 🚀 INICIANDO TEST DE CARGA (Load Balancing) ---")
+print(f"--- [INICIANDO] TEST DE CARGA (Load Balancing) ---")
 print(f"Enviando tareas al Nodo 1 para ver si las distribuye...\n")
 
 # Enviamos 10 tareas seguidas
@@ -43,4 +43,4 @@ for x in range(10):
     enviar_tarea(x)
     time.sleep(1) # Esperar 1 seg entre peticiones para dar tiempo a ver los logs
 
-print("\n--- 🏁 TEST FINALIZADO ---")
+print("\n--- TEST FINALIZADO ---")

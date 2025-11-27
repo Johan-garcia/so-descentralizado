@@ -136,7 +136,7 @@ class MLP:
         n_features = len(X_train[0])
         n_classes = max(y_train) + 1
         
-        print(f" [MLP] 🧠 Datos: {n_samples} muestras, {n_features} features, {n_classes} clases")
+        print(f" [MLP] Datos: {n_samples} muestras, {n_features} features, {n_classes} clases")
         
         # Normalizar
         means = [sum(X_train[i][j] for i in range(n_samples)) / n_samples 
@@ -158,7 +158,7 @@ class MLP:
         # Entrenar
         final_loss = self.train(X_normalized, y_train, epochs=100, learning_rate=0.1)
         
-        print(f" [MLP] ✅ Entrenamiento completado - Loss final: {final_loss:.4f}")
+        print(f" [MLP] [OK] Entrenamiento completado - Loss final: {final_loss:.4f}")
         
         return {
             'status': 'success',

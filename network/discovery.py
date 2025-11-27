@@ -19,7 +19,7 @@ class NodeDiscovery:
         except:
             self.my_ip = '127.0.0.1'
             
-        print(f" [NET] 🌍 Mi IP pública es: {self.my_ip} (Ya no soy 127.0.0.1)")
+        print(f" [NET] Mi IP publica es: {self.my_ip} (Ya no soy 127.0.0.1)")
 
         # 2. LISTA DE AMIGOS (Tus IPs reales)
         self.known_nodes = [

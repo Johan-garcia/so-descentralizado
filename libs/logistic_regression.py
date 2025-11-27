@@ -42,7 +42,7 @@ class LogisticRegression:
         n_samples = len(X)
         n_features = len(X[0])
         
-        print(f" [LOGISTIC] 📊 Datos: {n_samples} muestras, {n_features} características")
+        print(f" [LOGISTIC] Datos: {n_samples} muestras, {n_features} caracteristicas")
         
         # Normalizar características (importante para logística)
         X_normalized = []
@@ -122,7 +122,7 @@ class LogisticRegression:
         
         accuracy = correct / n_samples
         
-        print(f" [LOGISTIC] ✅ Entrenamiento completado - Accuracy: {accuracy*100:.2f}%")
+        print(f" [LOGISTIC] [OK] Entrenamiento completado - Accuracy: {accuracy*100:.2f}%")
         
         return {
             'status': 'success',

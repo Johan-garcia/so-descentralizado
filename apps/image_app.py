@@ -9,7 +9,7 @@ class ImageApp:
         content = task_data.get('file_content')
         op = task_data.get('operation', 'invert')
         
-        print(f" [IMG APP] 🖼️ Procesando imagen: {op}")
+        print(f" [IMG APP] Procesando imagen: {op}")
         
         if not content:
             return {'status': 'error', 'msg': 'No image content'}

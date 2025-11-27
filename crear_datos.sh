@@ -4,7 +4,7 @@
 # Uso: ./crear_datos.sh
 
 echo "╔════════════════════════════════════════════════════╗"
-echo "║  📁 Creando archivos de datos de prueba           ║"
+echo "║  Creando archivos de datos de prueba              ║"
 echo "╚════════════════════════════════════════════════════╝"
 echo ""
 
@@ -12,7 +12,7 @@ echo ""
 mkdir -p mis_datos
 
 # --- Dataset de Regresión Lineal ---
-echo "📄 Creando mis_datos/regresion.txt..."
+echo "Creando mis_datos/regresion.txt..."
 cat > mis_datos/regresion.txt << 'EOF'
 # Dataset: Predicción de Precios de Casas
 # Formato: area_m2,habitaciones,antiguedad,precio_miles
@@ -57,10 +57,10 @@ cat > mis_datos/regresion.txt << 'EOF'
 142.5,3,5,290.8
 172.8,4,3,370.5
 EOF
-echo "   ✅ Creado (40 registros)"
+echo "   [OK] Creado (40 registros)"
 
 # --- Dataset de Regresión Logística ---
-echo "📄 Creando mis_datos/clasificacion.txt..."
+echo "Creando mis_datos/clasificacion.txt..."
 cat > mis_datos/clasificacion.txt << 'EOF'
 # Dataset: Aprobación de Créditos
 # Formato: ingresos_mensuales,edad,historial_crediticio,num_tarjetas,aprobado
@@ -105,10 +105,10 @@ cat > mis_datos/clasificacion.txt << 'EOF'
 5400.50,42,790,1,1
 3150.00,28,700,2,1
 EOF
-echo "   ✅ Creado (40 registros)"
+echo "   [OK] Creado (40 registros)"
 
 # --- Dataset de Red Neuronal MLP ---
-echo "📄 Creando mis_datos/red_neuronal.txt..."
+echo "Creando mis_datos/red_neuronal.txt..."
 cat > mis_datos/red_neuronal.txt << 'EOF'
 # Dataset: Clasificación de Flores (Iris-like)
 # Formato: sepal_length,sepal_width,petal_length,petal_width,class
@@ -161,10 +161,10 @@ cat > mis_datos/red_neuronal.txt << 'EOF'
 6.4,2.8,5.6,2.2,2
 6.3,2.8,5.1,1.5,2
 EOF
-echo "   ✅ Creado (48 registros)"
+echo "   [OK] Creado (48 registros)"
 
 # --- Dataset de Imagen ---
-echo "📄 Creando mis_datos/imagen.txt..."
+echo "Creando mis_datos/imagen.txt..."
 cat > mis_datos/imagen.txt << 'EOF'
 # Imagen en formato matriz (32x8 escala de grises)
 # Valores: 0-255
@@ -201,12 +201,12 @@ cat > mis_datos/imagen.txt << 'EOF'
 165,180,195,210,225,240,255,255
 185,200,215,230,245,255,255,255
 EOF
-echo "   ✅ Creado (32 filas x 8 columnas)"
+echo "   [OK] Creado (32 filas x 8 columnas)"
 
 echo ""
 echo "╔════════════════════════════════════════════════════╗"
-echo "║  ✅ TODOS LOS ARCHIVOS CREADOS                    ║"
+echo "║  [OK] TODOS LOS ARCHIVOS CREADOS                  ║"
 echo "╚════════════════════════════════════════════════════╝"
 echo ""
-echo "📁 Archivos en mis_datos/:"
+echo "Archivos en mis_datos/:"
 ls -la mis_datos/

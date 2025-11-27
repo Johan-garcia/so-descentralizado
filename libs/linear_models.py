@@ -35,7 +35,7 @@ class LinearRegression:
         n_samples = len(X)
         n_features = len(X[0])
         
-        print(f" [LINEAR] 📊 Datos: {n_samples} muestras, {n_features} características")
+        print(f" [LINEAR] Datos: {n_samples} muestras, {n_features} caracteristicas")
         
         # ===== NORMALIZACIÓN (CRÍTICO PARA ESTABILIDAD) =====
         X_normalized = []
@@ -121,7 +121,7 @@ class LinearRegression:
         mse_real = sum((final_predictions_real[i] - y[i])**2 for i in range(n_samples)) / n_samples
         rmse_real = math.sqrt(mse_real)
         
-        print(f" [LINEAR] ✅ Entrenamiento completado - RMSE: {rmse_real:.4f}")
+        print(f" [LINEAR] [OK] Entrenamiento completado - RMSE: {rmse_real:.4f}")
         
         return {
             'status': 'success',
@@ -162,7 +162,7 @@ class DecisionTree:
         if not X:
             return {'status': 'error', 'msg': 'No valid data'}
         
-        print(f" [TREE] 🌳 Datos: {len(X)} muestras")
+        print(f" [TREE] Datos: {len(X)} muestras")
         
         # Árbol simple: usar promedio como predicción
         avg = sum(y) / len(y)

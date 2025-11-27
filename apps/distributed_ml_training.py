@@ -8,7 +8,7 @@ class DistributedMLTraining:
         self.api.register_handler('TRAIN', self.handle_train)
         
     def handle_train(self, data):
-        print(f"[APP] 🤖 Training request received")
+        print(f"[APP] Training request received")
         X = np.array(data['X'])
         y = np.array(data['y'])
         
