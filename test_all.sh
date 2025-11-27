@@ -18,7 +18,7 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 1: Regresión Lineal (Single Node)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar. py mis_datos/regresion.txt linear single
+python3 ejecutar.py mis_datos/regresion.txt linear single
 echo ""
 sleep 2
 
@@ -26,7 +26,7 @@ sleep 2
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 2: Regresión Lineal (Parallel/Federated)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar.py mis_datos/regresion. txt linear parallel
+python3 ejecutar.py mis_datos/regresion.txt linear parallel
 echo ""
 sleep 2
 
@@ -34,7 +34,7 @@ sleep 2
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 3: Regresión Logística (Parallel)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar. py mis_datos/clasificacion.txt logistic parallel
+python3 ejecutar.py mis_datos/clasificacion.txt logistic parallel
 echo ""
 sleep 2
 

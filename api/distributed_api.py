@@ -80,7 +80,7 @@ class DistributedAPI:
         if task_type == 'ML_TRAIN':
             count = len(valid_results)
             num_weights = len(valid_results[0]['weights'])
-            avg_weights = [0. 0] * num_weights
+            avg_weights = [0.0] * num_weights
             avg_bias = 0.0
             
             for res in valid_results:
@@ -105,7 +105,7 @@ class DistributedAPI:
             num_weights = len(valid_results[0]['weights'])
             avg_weights = [0.0] * num_weights
             avg_bias = 0.0
-            total_accuracy = 0. 0
+            total_accuracy = 0.0
             
             for res in valid_results:
                 w = res['weights']
@@ -234,7 +234,7 @@ class DistributedAPI:
             else:
                 try:
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.settimeout(1. 0)
+                    s.settimeout(1.0)
                     s.connect((target, self.port))
                     s.close()
                     active_workers.append(w)
