@@ -1,82 +1,68 @@
-#!/usr/bin/env python3
-"""
-Implementación propia de Regresión Logística
-"""
-import numpy as np
+import math
+import time
 
 class LogisticRegression:
-    def __init__(self, learning_rate=0.01, n_iterations=1000):
-        self.learning_rate = learning_rate
-        self.n_iterations = n_iterations
-        self.weights = None
-        self.bias = None
-        self.losses = []
-        
-    def sigmoid(self, z):
-        """Función sigmoide"""
-        return 1 / (1 + np.exp(-z))
-        
-    def fit(self, X, y):
-        """
-        Entrena el modelo
-        X: matriz de features (n_samples, n_features)
-        y: vector de targets binarios (n_samples,)
-        """
-        n_samples, n_features = X.shape
-        
-        # Inicializar parámetros
-        self.weights = np.zeros(n_features)
-        self.bias = 0
-        
-        # Gradient Descent
-        for i in range(self.n_iterations):
-            # Predicción
-            linear_model = np.dot(X, self.weights) + self.bias
-            y_predicted = self.sigmoid(linear_model)
-            
-            # Calcular gradientes
-            dw = (1/n_samples) * np.dot(X.T, (y_predicted - y))
-            db = (1/n_samples) * np.sum(y_predicted - y)
-            
-            # Actualizar parámetros
-            self.weights -= self.learning_rate * dw
-            self.bias -= self.learning_rate * db
-            
-            # Calcular loss (Binary Cross-Entropy)
-            if i % 100 == 0:
-                loss = -np.mean(y * np.log(y_predicted + 1e-15) + 
-                               (1 - y) * np.log(1 - y_predicted + 1e-15))
-                self.losses.append(loss)
-                
-        return self
-        
-    def predict(self, X, threshold=0.5):
-        """Realiza predicciones binarias"""
-        linear_model = np.dot(X, self.weights) + self.bias
-        y_predicted = self.sigmoid(linear_model)
-        return (y_predicted >= threshold).astype(int)
-        
-    def predict_proba(self, X):
-        """Retorna probabilidades"""
-        linear_model = np.dot(X, self.weights) + self.bias
-        return self.sigmoid(linear_model)
-        
-    def accuracy(self, X, y):
-        """Calcula accuracy"""
-        predictions = self.predict(X)
-        return np.mean(predictions == y)
+    def __init__(self, learning_rate=0.1, iterations=1000):
+        self.lr = learning_rate
+        self.iters = iterations
+        self.weights = []
+        self.bias = 0.0
 
-# Test
-if __name__ == "__main__":
-    # Datos de ejemplo (clasificación binaria)
-    X = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]])
-    y = np.array([0, 0, 0, 1, 1, 1])
-    
-    model = LogisticRegression(learning_rate=0.1, n_iterations=1000)
-    model.fit(X, y)
-    
-    predictions = model.predict(X)
-    accuracy = model.accuracy(X, y)
-    
-    print(f"Predictions: {predictions}")
-    print(f"Accuracy: {accuracy:.4f}")
+    def _sigmoid(self, z):
+        # Evitar overflow
+        if z < -709: return 0.0
+        if z > 709: return 1.0
+        return 1.0 / (1.0 + math.exp(-z))
+
+    def _parse_content(self, file_content):
+        X, y = [], []
+        lines = file_content.strip().split('\n')
+        for line in lines:
+            parts = line.split(',')
+            try:
+                vals = [float(p) for p in parts]
+                X.append(vals[:-1])
+                y.append(vals[-1])
+            except: continue
+        return X, y
+
+    def fit_from_content(self, file_content):
+        X, y = self._parse_content(file_content)
+        if not X: return {'status': 'error', 'msg': 'No data'}
+
+        print(f" [MATH] 📉 Entrenando Regresión Logística ({len(X)} muestras)...")
+        time.sleep(5) # Simular carga pesada para ver paralelismo
+
+        n_samples = len(X)
+        n_features = len(X[0])
+        self.weights = [0.0] * n_features
+        self.bias = 0.0
+
+        # Descenso de Gradiente
+        for _ in range(self.iters):
+            dw = [0.0] * n_features
+            db = 0.0
+            
+            for i in range(n_samples):
+                # 1. Predicción Lineal: z = w*x + b
+                linear_model = sum(X[i][j] * self.weights[j] for j in range(n_features)) + self.bias
+                # 2. Activación: y_pred = sigmoid(z)
+                y_predicted = self._sigmoid(linear_model)
+                
+                # 3. Calculo de Gradientes
+                diff = y_predicted - y[i]
+                for j in range(n_features):
+                    dw[j] += (1 / n_samples) * X[i][j] * diff
+                db += (1 / n_samples) * diff
+
+            # 4. Actualizar Pesos
+            for j in range(n_features):
+                self.weights[j] -= self.lr * dw[j]
+            self.bias -= self.lr * db
+
+        return {
+            "status": "success",
+            "weights": self.weights,
+            "bias": self.bias,
+            "algorithm": "LogisticRegression"
+        }
