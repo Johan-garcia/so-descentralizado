@@ -6,25 +6,23 @@ import time
 from apps.ml_app import MLApp
 from apps.image_app import ImageApp
 from apps.monitor_app import MonitorApp
-from apps.classification_app import ClassificationApp
 from apps.mlp_app import MLPApp
-from apps.logistic_app import LogisticApp  # <--- NUEVO
+from apps.logistic_app import LogisticApp
 
 class DistributedAPI:
     def __init__(self, node_id, discovery, scheduler, port=5001):
-        self.node_id = node_id
+        self. node_id = node_id
         self.discovery = discovery
         self.scheduler = scheduler
         self.port = port
-        self.running = False
+        self. running = False
 
         # Apps Locales
         self.ml_app = MLApp(node_id)
         self.image_app = ImageApp(node_id)
         self.monitor_app = MonitorApp(node_id)
-        self.classification_app = ClassificationApp(node_id)
         self.mlp_app = MLPApp(node_id)
-        self.logistic_app = LogisticApp(node_id) # <--- NUEVO
+        self.logistic_app = LogisticApp(node_id)
 
     def _send_msg(self, sock, msg):
         msg_bytes = json.dumps(msg).encode()
@@ -40,7 +38,7 @@ class DistributedAPI:
                 packet = sock.recv(min(4096, msg_len - len(data)))
                 if not packet: return None
                 data += packet
-            return json.loads(data.decode())
+            return json.loads(data. decode())
         except: return None
 
     def forward_request(self, target_ip, msg):
@@ -69,15 +67,15 @@ class DistributedAPI:
         return chunks
 
     def _aggregate_results(self, results, task_type):
-        valid_results = [r for r in results if r and r.get('status') == 'success']
+        valid_results = [r for r in results if r and r. get('status') == 'success']
         failed_count = len(results) - len(valid_results)
         
         if not valid_results: return {'status': 'error', 'msg': 'All nodes failed'}
 
         # --- LOGICA DE AGREGACION (FEDERATED LEARNING) ---
         
-        # 1. Regresión Lineal y Logística (Vector simple de pesos)
-        if task_type in ['ML_TRAIN', 'LOGISTIC']:
+        # 1. Regresión Lineal (Vector simple de pesos)
+        if task_type == 'ML_TRAIN':
             count = len(valid_results)
             num_weights = len(valid_results[0]['weights'])
             avg_weights = [0.0] * num_weights
@@ -92,103 +90,182 @@ class DistributedAPI:
             return {
                 'status': 'success',
                 'distribution_mode': 'FEDERATED_AVG',
+                'algorithm': 'Linear Regression',
                 'final_weights': [x/count for x in avg_weights],
                 'final_bias': avg_bias/count,
-                'nodes_involved': [r['executed_by'] for r in valid_results]
+                'nodes_involved': [r['executed_by'] for r in valid_results],
+                'nodes_count': len(valid_results)
             }
 
-        # 2. MLP (Promedio de Matrices complejas)
+        # 2. Regresión Logística
+        elif task_type == 'LOGISTIC':
+            count = len(valid_results)
+            num_weights = len(valid_results[0]['weights'])
+            avg_weights = [0.0] * num_weights
+            avg_bias = 0.0
+            total_accuracy = 0.0
+            
+            for res in valid_results:
+                w = res['weights']
+                b = res['bias']
+                avg_bias += b
+                total_accuracy += res. get('accuracy', 0)
+                for i in range(num_weights): avg_weights[i] += w[i]
+            
+            return {
+                'status': 'success',
+                'distribution_mode': 'FEDERATED_AVG',
+                'algorithm': 'Logistic Regression',
+                'final_weights': [x/count for x in avg_weights],
+                'final_bias': avg_bias/count,
+                'avg_accuracy': total_accuracy/count,
+                'nodes_involved': [r['executed_by'] for r in valid_results],
+                'nodes_count': len(valid_results)
+            }
+
+        # 3. MLP (Promedio de Matrices complejas)
         elif task_type == 'MLP_TRAIN':
             count = len(valid_results)
             base = valid_results[0]
             
-            # Clonamos estructuras para sumar
-            # Nota: En producción real esto requiere numpy por eficiencia, aquí a mano.
-            # Asumimos misma topología en todos los nodos.
-            W1_sum = base['input_to_hidden_w']
-            b1_sum = base['hidden_bias']
-            W2_sum = base['hidden_to_output_w']
-            b2_sum = base['output_bias']
+            # Inicializar matrices suma
+            W1_sum = [[cell for cell in row] for row in base['input_to_hidden_w']]
+            b1_sum = base['hidden_bias'][:]
+            W2_sum = [[cell for cell in row] for row in base['hidden_to_output_w']]
+            b2_sum = base['output_bias'][:]
+            total_loss = base. get('final_loss', 0)
 
             # Sumar resto de nodos
             for i in range(1, count):
                 res = valid_results[i]
+                total_loss += res.get('final_loss', 0)
+                
                 # Sumar W1
                 for r in range(len(W1_sum)):
                     for c in range(len(W1_sum[0])):
                         W1_sum[r][c] += res['input_to_hidden_w'][r][c]
+                
+                # Sumar b1
+                for j in range(len(b1_sum)):
+                    b1_sum[j] += res['hidden_bias'][j]
+                
                 # Sumar W2
                 for r in range(len(W2_sum)):
                     for c in range(len(W2_sum[0])):
                         W2_sum[r][c] += res['hidden_to_output_w'][r][c]
-                # Sumar b1, b2... (omito bcles extra por brevedad, idea es promedio)
+                
+                # Sumar b2
+                for j in range(len(b2_sum)):
+                    b2_sum[j] += res['output_bias'][j]
 
-            # Dividir todo por count (Simplificado para W1 y W2)
+            # Promediar todo
             W1_avg = [[x / count for x in row] for row in W1_sum]
+            b1_avg = [x / count for x in b1_sum]
             W2_avg = [[x / count for x in row] for row in W2_sum]
+            b2_avg = [x / count for x in b2_sum]
             
             return {
                 'status': 'success',
                 'distribution_mode': 'FEDERATED_MLP_AVG',
-                'global_model_W1': W1_avg, # Pesos promediados del cluster
-                'global_model_W2': W2_avg,
-                'nodes_involved': [r['executed_by'] for r in valid_results]
+                'algorithm': 'Multi-Layer Perceptron',
+                'global_model': {
+                    'input_to_hidden_weights': W1_avg,
+                    'hidden_bias': b1_avg,
+                    'hidden_to_output_weights': W2_avg,
+                    'output_bias': b2_avg
+                },
+                'avg_loss': total_loss / count,
+                'nodes_involved': [r['executed_by'] for r in valid_results],
+                'nodes_count': len(valid_results)
             }
 
+        # 4. Procesamiento de Imágenes
         elif task_type == 'IMAGE_PROC':
             final_matrix = []
-            for res in results:
-                 if res and res.get('status') == 'success':
-                    final_matrix.extend(res['processed_matrix'])
-            return {'status': 'success', 'processed_matrix': final_matrix}
+            operations = []
+            for res in valid_results:
+                final_matrix.extend(res['processed_matrix'])
+                operations.append(res. get('operation', 'unknown'))
+            
+            return {
+                'status': 'success',
+                'distribution_mode': 'CHUNK_PROCESSING',
+                'algorithm': 'Image Processing',
+                'processed_matrix': final_matrix,
+                'total_rows': len(final_matrix),
+                'operations': list(set(operations)),
+                'nodes_involved': [r['executed_by'] for r in valid_results],
+                'nodes_count': len(valid_results)
+            }
 
         return {'status': 'success', 'results': valid_results}
 
     def process_parallel(self, msg):
         peers = self.discovery.get_peers()
-        candidates = [{'ip': p['ip']} for p in peers.values()]
+        candidates = [{'ip': p['ip']} for p in peers. values()]
         candidates.append({'ip': 'local'})
         
         active_workers = []
         print(f" [PARALLEL] 🔍 Buscando nodos para {msg['type']}...")
         for w in candidates:
             target = w['ip']
-            if target == 'local': active_workers.append(w)
+            if target == 'local': 
+                active_workers.append(w)
             else:
                 try:
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.settimeout(1.0); s.connect((target, self.port)); s.close()
+                    s.settimeout(1. 0)
+                    s.connect((target, self.port))
+                    s.close()
                     active_workers.append(w)
-                except: pass
+                    print(f" [PARALLEL] ✅ Nodo {target} disponible")
+                except: 
+                    print(f" [PARALLEL] ⚠️  Nodo {target} no responde")
         
         num_workers = len(active_workers)
         print(f" [PARALLEL] 🚀 Distribuyendo a {num_workers} nodos...")
-        chunks = self._split_data(msg['data'].get('file_content',''), num_workers)
+        chunks = self._split_data(msg['data']. get('file_content',''), num_workers)
         
-        threads = []; results = [None]*len(chunks)
+        threads = []
+        results = [None] * len(chunks)
         
         def worker(idx, ip, data):
-            sub = msg.copy(); sub['data'] = msg['data'].copy(); sub['data']['file_content'] = data
-            if ip == 'local': results[idx] = self.process_local(sub)
-            else: results[idx] = self.forward_request(ip, sub)
+            sub = msg. copy()
+            sub['data'] = msg['data'].copy()
+            sub['data']['file_content'] = data
+            if ip == 'local': 
+                results[idx] = self.process_local(sub)
+            else: 
+                results[idx] = self.forward_request(ip, sub)
 
         for i, w in enumerate(active_workers):
             if i < len(chunks):
-                threading.Thread(target=worker, args=(i, w['ip'], chunks[i])).start()
-                threads.append(threads[-1])
+                t = threading.Thread(target=worker, args=(i, w['ip'], chunks[i]))
+                t.start()
+                threads.append(t)
         
-        for t in threads: t.join()
+        for t in threads: 
+            t.join()
+        
         return self._aggregate_results(results, msg['type'])
 
     def process_local(self, msg):
-        t = msg.get('type')
+        t = msg. get('type')
         d = msg['data']
-        if t == 'ML_TRAIN': return self.ml_app.run_task(d)
-        elif t == 'LOGISTIC': return self.logistic_app.run_task(d) # <--- NUEVO
-        elif t == 'MLP_TRAIN': return self.mlp_app.run_task(d)     # <--- NUEVO
-        elif t == 'IMAGE_PROC': return self.image_app.process(d)
-        elif t == 'CLASSIFY': return self.classification_app.run_task(d)
-        elif t == 'MONITOR': return self.monitor_app.get_stats()
+        
+        print(f" [LOCAL] 🔧 Procesando {t} en nodo {self.node_id}")
+        
+        if t == 'ML_TRAIN': 
+            return self.ml_app.run_task(d)
+        elif t == 'LOGISTIC': 
+            return self.logistic_app.run_task(d)
+        elif t == 'MLP_TRAIN': 
+            return self.mlp_app. run_task(d)
+        elif t == 'IMAGE_PROC': 
+            return self. image_app.process(d)
+        elif t == 'MONITOR': 
+            return self.monitor_app.get_stats()
+        
         return {'status': 'error', 'msg': 'Unknown Task'}
 
     def _handle_client(self, client):
@@ -196,29 +273,41 @@ class DistributedAPI:
             msg = self._recv_msg(client)
             if not msg: return
             
+            print(f" [API] 📨 Solicitud recibida: {msg. get('type')} en modo {msg.get('mode', 'single')}")
+            
             if msg.get('mode') == 'parallel':
                 response = self.process_parallel(msg)
             else:
                 is_fwd = msg.get('is_forwarded', False)
                 target = 'local' if is_fwd else self.scheduler.decide_node()
-                if target == 'local': response = self.process_local(msg)
-                else: response = self.forward_request(target, msg)
+                if target == 'local': 
+                    response = self. process_local(msg)
+                else: 
+                    response = self.forward_request(target, msg)
             
             self._send_msg(client, response)
-        except Exception as e: print(e)
-        finally: client.close()
+        except Exception as e: 
+            print(f" [API] ❌ Error procesando cliente: {e}")
+        finally: 
+            client.close()
 
     def start(self):
         self.running = True
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s. setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(('0.0.0.0', self.port))
         s.listen(20)
-        print(f" [API] Listening on {self.port}")
+        print(f" [API] 🎧 Listening on port {self.port}")
+        
         def run():
             while self.running:
-                try: c,a = s.accept(); threading.Thread(target=self._handle_client, args=(c,)).start()
-                except: pass
+                try: 
+                    c, a = s.accept()
+                    threading.Thread(target=self._handle_client, args=(c,)). start()
+                except: 
+                    pass
+        
         threading.Thread(target=run, daemon=True).start()
 
-    def stop(self): self.running = False
+    def stop(self): 
+        self.running = False

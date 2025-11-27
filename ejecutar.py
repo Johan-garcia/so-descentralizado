@@ -4,12 +4,13 @@ import socket
 import os
 import struct
 
-API_IP = '127.0.0.1'
+API_IP = '127.0.0. 1'
 API_PORT = 5001
 
 def enviar_al_kernel(payload):
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client. settimeout(30)  # Timeout más largo para procesos distribuidos
         client.connect((API_IP, API_PORT))
         
         # Protocolo con longitud (Seguro)
@@ -28,16 +29,26 @@ def enviar_al_kernel(payload):
             data += packet
             
         client.close()
-        return json.loads(data.decode())
+        return json. loads(data.decode())
     except Exception as e:
         return {'status': 'error', 'msg': str(e)}
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("❌ Uso: python3 ejecutar.py <archivo> <app> [modo]")
-        print("   Apps: linear, image")
-        print("   Modo: single (defecto) o parallel")
-        print("   Ejemplo: python3 ejecutar.py mis_datos/regresion.txt linear parallel")
+        print("\n📚 Apps disponibles:")
+        print("   • linear    - Regresión Lineal")
+        print("   • logistic  - Regresión Logística")
+        print("   • mlp       - Red Neuronal (MLP)")
+        print("   • image     - Procesamiento de Imágenes")
+        print("\n⚙️  Modos:")
+        print("   • single   - Ejecuta en un solo nodo (defecto)")
+        print("   • parallel - Distribuye entre todos los nodos")
+        print("\n📝 Ejemplos:")
+        print("   python3 ejecutar.py mis_datos/regresion.txt linear parallel")
+        print("   python3 ejecutar.py mis_datos/clasificacion.txt logistic parallel")
+        print("   python3 ejecutar.py mis_datos/red_neuronal.txt mlp parallel")
+        print("   python3 ejecutar.py mis_datos/imagen.txt image parallel")
         sys.exit(1)
 
     archivo_path = sys.argv[1]
@@ -52,23 +63,40 @@ if __name__ == "__main__":
         contenido = f.read()
 
     payload = {
-        'mode': modo, # 'single' o 'parallel'
+        'mode': modo,
         'data': {'file_content': contenido}
     }
 
     if app_type == 'linear':
         payload['type'] = 'ML_TRAIN'
         payload['data']['algorithm'] = 'linear'
+        print("🤖 Algoritmo: Regresión Lineal")
+        
+    elif app_type == 'logistic':
+        payload['type'] = 'LOGISTIC'
+        print("🤖 Algoritmo: Regresión Logística")
+        
+    elif app_type == 'mlp':
+        payload['type'] = 'MLP_TRAIN'
+        print("🤖 Algoritmo: Red Neuronal (MLP)")
+        
     elif app_type == 'image':
         payload['type'] = 'IMAGE_PROC'
         payload['data']['operation'] = 'invert'
+        print("🤖 Algoritmo: Procesamiento de Imágenes")
+        
     else:
-        print("App desconocida.")
-        sys.exit(1)
+        print(f"❌ App desconocida: {app_type}")
+        print("Apps válidas: linear, logistic, mlp, image")
+        sys. exit(1)
 
-    print(f"🚀 Enviando tarea (Modo: {modo.upper()}) al cluster...")
+    print(f"🚀 Enviando tarea en modo: {modo. upper()}")
+    print(f"📂 Archivo: {archivo_path}\n")
     
     res = enviar_al_kernel(payload)
     
-    print("\n📥 RESULTADO FINAL:")
-    print(json.dumps(res, indent=2))
+    print("\n" + "="*60)
+    print("📥 RESULTADO FINAL")
+    print("="*60)
+    print(json.dumps(res, indent=2, ensure_ascii=False))
+    print("="*60)
