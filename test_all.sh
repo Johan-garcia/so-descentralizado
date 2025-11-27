@@ -26,7 +26,7 @@ sleep 2
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 2: Regresión Lineal (Parallel/Federated)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar.py mis_datos/regresion. txt linear parallel
+python3 ejecutar.py mis_datos/regresion.txt linear parallel
 echo ""
 sleep 2
 
@@ -50,7 +50,7 @@ sleep 2
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 5: Procesamiento de Imágenes (Parallel)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar. py mis_datos/imagen.txt image parallel
+python3 ejecutar.py mis_datos/imagen.txt image parallel
 echo ""
 
 echo "╔════════════════════════════════════════════════════╗"
