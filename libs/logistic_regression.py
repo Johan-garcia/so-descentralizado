@@ -3,7 +3,7 @@ import math
 class LogisticRegression:
     def __init__(self):
         self.weights = []
-        self.bias = 0. 0
+        self.bias = 0.0
 
     def sigmoid(self, z):
         """Función sigmoide con protección contra overflow"""
@@ -18,7 +18,7 @@ class LogisticRegression:
         Entrena regresión logística desde contenido CSV.
         Formato: x1,x2,...,xn,y (y debe ser 0 o 1)
         """
-        lines = [l.strip() for l in content.strip().split('\n') if l.strip() and not l. startswith('#')]
+        lines = [l.strip() for l in content.strip().split('\n') if l.strip() and not l.startswith('#')]
         
         if not lines:
             return {'status': 'error', 'msg': 'No data provided'}
@@ -56,7 +56,7 @@ class LogisticRegression:
         # Calcular desviaciones estándar
         for j in range(n_features):
             variance = sum((X[i][j] - means[j])**2 for i in range(n_samples)) / n_samples
-            stds[j] = math. sqrt(variance) if variance > 0 else 1.0
+            stds[j] = math.sqrt(variance) if variance > 0 else 1.0
         
         # Normalizar
         for i in range(n_samples):
@@ -70,7 +70,7 @@ class LogisticRegression:
         
         # Inicializar pesos
         self.weights = [0.0] * n_features
-        self.bias = 0. 0
+        self.bias = 0.0
         
         # Hiperparámetros
         learning_rate = 0.1
