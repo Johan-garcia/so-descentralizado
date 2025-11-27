@@ -14,7 +14,7 @@ fi
 echo "✅ Sistema activo"
 echo ""
 
-# Test 1: Regresión Lineal
+# Test 1: Regresión Lineal (Single)
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 1: Regresión Lineal (Single Node)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -22,11 +22,11 @@ python3 ejecutar.py mis_datos/regresion.txt linear single
 echo ""
 sleep 2
 
-# Test 2: Regresión Lineal Paralela
+# Test 2: Regresión Lineal (Parallel)
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 2: Regresión Lineal (Parallel/Federated)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar.py mis_datos/regresion.txt linear parallel
+python3 ejecutar.py mis_datos/regresion. txt linear parallel
 echo ""
 sleep 2
 
@@ -46,9 +46,17 @@ python3 ejecutar.py mis_datos/red_neuronal.txt mlp parallel
 echo ""
 sleep 2
 
-# Test 5: Procesamiento de Imágenes
+# Test 5: Árbol de Decisión
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🧪 TEST 5: Procesamiento de Imágenes (Parallel)"
+echo "🧪 TEST 5: Árbol de Decisión (Parallel)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+python3 ejecutar.py mis_datos/arbol.txt tree parallel
+echo ""
+sleep 2
+
+# Test 6: Procesamiento de Imágenes
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🧪 TEST 6: Procesamiento de Imágenes (Parallel)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 python3 ejecutar.py mis_datos/imagen.txt image parallel
 echo ""
@@ -56,3 +64,12 @@ echo ""
 echo "╔════════════════════════════════════════════════════╗"
 echo "║  ✅ TODAS LAS PRUEBAS COMPLETADAS                 ║"
 echo "╚════════════════════════════════════════════════════╝"
+echo ""
+echo "📊 Resumen de algoritmos probados:"
+echo "   1. ✅ Regresión Lineal (Single + Parallel)"
+echo "   2. ✅ Regresión Logística (Parallel)"
+echo "   3. ✅ Red Neuronal MLP (Parallel)"
+echo "   4. ✅ Árbol de Decisión (Parallel)"
+echo "   5.  ✅ Procesamiento de Imágenes (Parallel)"
+echo ""
+echo "🔍 Para ver logs detallados: docker logs -f so-node"

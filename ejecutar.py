@@ -40,6 +40,7 @@ if __name__ == "__main__":
         print("   • linear    - Regresión Lineal")
         print("   • logistic  - Regresión Logística")
         print("   • mlp       - Red Neuronal (MLP)")
+        print("   • tree      - Árbol de Decisión")
         print("   • image     - Procesamiento de Imágenes")
         print("\n⚙️  Modos:")
         print("   • single   - Ejecuta en un solo nodo (defecto)")
@@ -48,7 +49,8 @@ if __name__ == "__main__":
         print("   python3 ejecutar.py mis_datos/regresion.txt linear parallel")
         print("   python3 ejecutar.py mis_datos/clasificacion.txt logistic parallel")
         print("   python3 ejecutar.py mis_datos/red_neuronal.txt mlp parallel")
-        print("   python3 ejecutar.py mis_datos/imagen.txt image parallel")
+        print("   python3 ejecutar.py mis_datos/arbol.txt tree parallel")
+        print("   python3 ejecutar.py mis_datos/imagen. txt image parallel")
         sys.exit(1)
 
     archivo_path = sys.argv[1]
@@ -80,6 +82,11 @@ if __name__ == "__main__":
         payload['type'] = 'MLP_TRAIN'
         print("🤖 Algoritmo: Red Neuronal (MLP)")
         
+    elif app_type == 'tree':
+        payload['type'] = 'TREE_TRAIN'
+        payload['data']['max_depth'] = 5  # Profundidad máxima del árbol
+        print("🤖 Algoritmo: Árbol de Decisión")
+        
     elif app_type == 'image':
         payload['type'] = 'IMAGE_PROC'
         payload['data']['operation'] = 'invert'
@@ -87,10 +94,10 @@ if __name__ == "__main__":
         
     else:
         print(f"❌ App desconocida: {app_type}")
-        print("Apps válidas: linear, logistic, mlp, image")
+        print("Apps válidas: linear, logistic, mlp, tree, image")
         sys.exit(1)
 
-    print(f"🚀 Enviando tarea en modo: {modo.upper()}")
+    print(f"🚀 Enviando tarea en modo: {modo. upper()}")
     print(f"📂 Archivo: {archivo_path}\n")
     
     res = enviar_al_kernel(payload)
