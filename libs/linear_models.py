@@ -3,14 +3,14 @@ import math
 class LinearRegression:
     def __init__(self):
         self.weights = []
-        self.bias = 0. 0
+        self.bias = 0.0
 
     def fit_from_content(self, content):
         """
         Entrena regresión lineal desde contenido CSV.
         Formato esperado: x1,x2,... ,xn,y
         """
-        lines = [l.strip() for l in content. strip().split('\n') if l. strip() and not l.startswith('#')]
+        lines = [l.strip() for l in content.strip().split('\n') if l.strip() and not l.startswith('#')]
         
         if not lines:
             return {'status': 'error', 'msg': 'No data provided'}
@@ -21,11 +21,11 @@ class LinearRegression:
         
         for line in lines:
             try:
-                values = [float(v. strip()) for v in line.split(',')]
+                values = [float(v.strip()) for v in line.split(',')]
                 if len(values) < 2:
                     continue
                 X.append(values[:-1])  # Todas menos la última columna
-                y. append(values[-1])    # Última columna es el target
+                y.append(values[-1])    # Última columna es el target
             except ValueError:
                 continue
         
@@ -55,7 +55,7 @@ class LinearRegression:
         for i in range(n_samples):
             normalized_row = []
             for j in range(n_features):
-                normalized_val = (X[i][j] - means[j]) / stds[j] if stds[j] > 0 else 0. 0
+                normalized_val = (X[i][j] - means[j]) / stds[j] if stds[j] > 0 else 0.0
                 normalized_row.append(normalized_val)
             X_normalized.append(normalized_row)
         
@@ -83,10 +83,10 @@ class LinearRegression:
                 pred = self.bias
                 for j in range(n_features):
                     pred += self.weights[j] * X[i][j]
-                predictions. append(pred)
+                predictions.append(pred)
             
             # Calcular gradientes
-            dw = [0. 0] * n_features
+            dw = [0.0] * n_features
             db = 0.0
             
             for i in range(n_samples):

@@ -9,7 +9,7 @@ class MLPApp:
         Entrena una red neuronal MLP. 
         Recibe: { 'file_content': '...' }
         """
-        content = task_data. get('file_content')
+        content = task_data.get('file_content')
         
         if not content:
             return {'status': 'error', 'msg': 'No file content provided'}
