@@ -152,7 +152,7 @@ class DecisionTree:
             
             # Probar thresholds entre valores consecutivos
             for i in range(len(values) - 1):
-                threshold = (values[i] + values[i + 1]) / 2. 0
+                threshold = (values[i] + values[i + 1]) / 2.0
                 
                 # Dividir datos
                 y_left = []

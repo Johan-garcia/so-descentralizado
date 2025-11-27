@@ -72,7 +72,7 @@ class LinearRegression:
         self.bias = 0.0
         
         # Hiperparámetros (CORREGIDOS)
-        learning_rate = 0.01  # Reducido de 0. 001 para estabilidad
+        learning_rate = 0.01  # Reducido de 0.001 para estabilidad
         epochs = 1000
         
         # Gradient Descent
