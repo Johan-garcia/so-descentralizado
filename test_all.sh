@@ -18,11 +18,11 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 1: Regresión Lineal (Single Node)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar.py mis_datos/regresion.txt linear single
+python3 ejecutar. py mis_datos/regresion.txt linear single
 echo ""
 sleep 2
 
-# Test 2: Regresión Lineal (Parallel)
+# Test 2: Regresión Lineal (Parallel) - CORREGIDO
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 2: Regresión Lineal (Parallel/Federated)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -34,7 +34,7 @@ sleep 2
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🧪 TEST 3: Regresión Logística (Parallel)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-python3 ejecutar.py mis_datos/clasificacion.txt logistic parallel
+python3 ejecutar. py mis_datos/clasificacion.txt logistic parallel
 echo ""
 sleep 2
 
@@ -67,9 +67,9 @@ echo "╚═══════════════════════�
 echo ""
 echo "📊 Resumen de algoritmos probados:"
 echo "   1. ✅ Regresión Lineal (Single + Parallel)"
-echo "   2. ✅ Regresión Logística (Parallel)"
+echo "   2.  ✅ Regresión Logística (Parallel)"
 echo "   3. ✅ Red Neuronal MLP (Parallel)"
 echo "   4. ✅ Árbol de Decisión (Parallel)"
-echo "   5.  ✅ Procesamiento de Imágenes (Parallel)"
+echo "   5. ✅ Procesamiento de Imágenes (Parallel)"
 echo ""
 echo "🔍 Para ver logs detallados: docker logs -f so-node"
